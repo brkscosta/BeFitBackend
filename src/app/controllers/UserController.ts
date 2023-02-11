@@ -17,7 +17,7 @@ export class UserController {
 
     static async addUser(req: Request<{}, {}, IUser>, res: Response) {
         const user = new User(req.body);
-
+        //mudei
         try {
             await user.save();
             res.status(201).json(user);
