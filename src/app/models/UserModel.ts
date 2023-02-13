@@ -69,7 +69,7 @@ const userSchema = new Schema({
 });
 
 userSchema.pre<IUser>('save', async function (next) {
-    const user = this;
+    const user = this as IUser;
     if (!user.isModified('password')) return next();
 
     const salt = await genSalt(10);

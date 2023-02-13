@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 import sanitizedConfig from '../config';
+import ErrorHandler from '../utils/ErrorHandler';
+import Logger from '../utils/Logger';
 
 const BASE_URL = `mongodb+srv://${sanitizedConfig.MONGO_USERNAME}:${sanitizedConfig.MONGO_PASSWORD}@${sanitizedConfig.MONGO_DOMAIN}/`;
 
 class Database {
-    private url: string = '';
+    private url: string;
+    private logger = new Logger();
+    private errorHandler = new ErrorHandler();
 
     constructor() {
         mongoose.set('strictQuery', false);
@@ -18,10 +22,9 @@ class Database {
     async connect() {
         try {
             const connection = await mongoose.connect(this.url);
-            console.log(`🟢 Mongo db connected:`, connection.connection.host);
+            this.logger.info('🟢 Mongo db connected', { ip: connection.connection.host });
         } catch (error) {
-            const typedError = error as Error;
-            console.log(typedError?.message);
+            this.errorHandler.handleError(error, '🔴 Error on connect to the mongo database');
         }
     }
 }

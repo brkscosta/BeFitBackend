@@ -1,10 +1,12 @@
+import Logger from '../utils/Logger';
+
 interface IMailAttachment {
     filename: string;
     path: string;
     contentType: string;
 }
 
-interface IMailHeader {
+export interface IMailHeader {
     from: string;
     to: string;
     cc?: string;
@@ -12,25 +14,30 @@ interface IMailHeader {
     subject: string;
 }
 
-interface IMailBody {
+export interface IMailBody {
     body: string;
     attachments?: IMailAttachment[];
 }
 
-interface IMail {
+export interface IMail {
     header: IMailHeader;
     body: IMailBody;
 }
 
 class EmailService {
     private email: IMail;
+    private logger = new Logger();
 
     constructor(email: IMail) {
         this.email = email;
     }
 
     sendMail() {
-        console.log(this.email);
+        this.logger.info('Email was sent!');
+    }
+
+    getMail(): IMail {
+        return this.email;
     }
 }
 

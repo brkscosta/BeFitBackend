@@ -1,13 +1,13 @@
 interface EventEmitterInterface {
-    on(event: string, listener: (...args: any[]) => void): this;
-    off(event: string, listener: (...args: any[]) => void): this;
-    emit(event: string, ...args: any[]): boolean;
+    on(event: string, listener: (...args: unknown[]) => void): this;
+    off(event: string, listener: (...args: unknown[]) => void): this;
+    emit(event: string, ...args: unknown[]): boolean;
 }
 
 class EventEmitter implements EventEmitterInterface {
-    private listeners: { [event: string]: Array<(...args: any[]) => void> } = {};
+    private listeners: { [event: string]: Array<(...args: unknown[]) => void> } = {};
 
-    on(event: string, listener: (...args: any[]) => void): this {
+    on(event: string, listener: (...args: unknown[]) => void): this {
         if (!this.listeners[event]) {
             this.listeners[event] = [];
         }
@@ -17,7 +17,7 @@ class EventEmitter implements EventEmitterInterface {
         return this;
     }
 
-    off(event: string, listener: (...args: any[]) => void): this {
+    off(event: string, listener: (...args: unknown[]) => void): this {
         if (!this.listeners[event]) {
             return this;
         }
@@ -29,7 +29,7 @@ class EventEmitter implements EventEmitterInterface {
         return this;
     }
 
-    emit(event: string, ...args: any[]): boolean {
+    emit(event: string, ...args: unknown[]): boolean {
         if (!this.listeners[event]) {
             return false;
         }
