@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmação de Ativação de Conta</title>
+    <style>
+        /* Estilo para o corpo da página */
+        body {
+            background-color: #F6F6F6;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333333;
+        }
+
+        /* Estilo para a área central da página */
+        .container {
+            margin: 0 auto;
+            max-width: 600px;
+            background-color: #FFFFFF;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilo para o cabeçalho da página */
+        .header {
+            border-bottom: 1px solid #E0E0E0;
+            padding-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Estilo para o título da página */
+        .title {
+            font-size: 24px;
+            margin: 0;
+            color: #333333;
+        }
+
+        /* Estilo para o ícone de confirmação */
+        .icon {
+            display: block;
+            margin: 0 auto;
+            font-size: 72px;
+            color: #4CAF50;
+        }
+
+        /* Estilo para o texto principal da página */
+        .main-text {
+            font-size: 18px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        /* Estilo para o botão de login */
+        .login-button {
+            display: block;
+            margin: 30px auto 0;
+            background-color: #4CAF50;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 3px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Estilo para o botão de login quando passa o mouse */
+        .login-button:hover {
+            background-color: #3E8E41;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Confirmação de Ativação de Conta</h1>
+        </div>
+        <i class="material-icons icon">&#xE876;</i>
+        <p class="main-text">{{activationLink}}</p>
+        <button class="login-button">Fazer Login</button>
+    </div>
+</body>
+
+</html>

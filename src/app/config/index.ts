@@ -16,8 +16,8 @@ interface IEnverionment {
     MONGO_DB_NAME: string;
     MONGO_DB_NAME_DEV: string;
     MONGO_DOMAIN: string;
-    SEND_GRID_API_KEY: string | undefined;
-    SECRET_HASH_TOKEN: string | undefined;
+    GMAIL_EMAIL: string;
+    GMAIL_PASSWORD: string;
 }
 
 interface IConfig {
@@ -28,12 +28,11 @@ interface IConfig {
     MONGO_DB_NAME: string;
     MONGO_DB_NAME_DEV: string;
     MONGO_DOMAIN: string;
-    SEND_GRID_API_KEY: string | undefined;
-    SECRET_HASH_TOKEN: string | undefined;
+    GMAIL_EMAIL: string;
+    GMAIL_PASSWORD: string;
 }
 
 // Loading process.env as ENV interface
-
 const getConfig = (): IEnverionment => {
     return {
         NODE_ENV: process.env.NODE_ENV,
@@ -43,8 +42,8 @@ const getConfig = (): IEnverionment => {
         MONGO_DB_NAME: process.env.MONGO_DB_NAME,
         MONGO_DB_NAME_DEV: process.env.MONGO_DB_NAME_DEV,
         MONGO_DOMAIN: process.env.MONGO_DOMAIN,
-        SEND_GRID_API_KEY: process.env.SEND_GRID_API_KEY,
-        SECRET_HASH_TOKEN: process.env.SECRET_HASH_TOKEN,
+        GMAIL_EMAIL: process.env.GMAIL_EMAIL,
+        GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
     };
 };
 
