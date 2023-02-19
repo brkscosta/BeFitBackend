@@ -35,7 +35,7 @@
         "@types/nodemailer": "^6.4.7",
         "@typescript-eslint/eslint-plugin": "^5.51.0",
         "@typescript-eslint/parser": "^5.51.0",
-        "chai": "^4.3.7",
+        "chai": "^4.0.0-canary.2",
         "dotenv": "^16.0.3",
         "eslint": "^8.34.0",
         "husky": "^8.0.3",

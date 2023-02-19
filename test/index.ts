@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import EmailService from './../src/app/services/EmailService';
 
-describe('Example class', () => {
+describe('Email Service', async () => {
     const header = {
         from: 'joanacosta97@gmail.com',
         to: 'joanacosta97@gmail.com',
