@@ -15,8 +15,8 @@
         "test": "yarn check-sintax && nyc mocha dist/test/*.js --recursive --timeout 60000 --exit",
         "format": "npx prettier --write .",
         "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
-        "copy-files": "cp ./src/app/assets/*.html ./dist/src/app/assets/",
-        "mkdir-assets": "mkdir ./dist/src/app/assets"
+        "copy-files": "cp ~/befitbackend/src/app/assets/*.html ~/befitbackend/dist/src/app/assets/",
+        "mkdir-assets": "mkdir ~/befitbackend/dist/src/app/assets"
     },
     "husky": {
         "hooks": {
