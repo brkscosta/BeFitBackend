@@ -5,7 +5,7 @@ import sanitizedConfig from '../config';
 import ErrorHandler from '../utils/ErrorHandler';
 import Logger from '../utils/Logger';
 
-const filePath = path.join(__dirname, 'AccountConfirmation.html');
+const filePath = path.join(__dirname, './../assets/AccountConfirmation.html');
 const html = fs.readFileSync(filePath, 'utf-8');
 
 interface IMailAttachment {
