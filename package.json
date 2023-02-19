@@ -10,11 +10,12 @@
     "scripts": {
         "start": "node dist/index.js",
         "dev:server": "ts-node-dev --respawn --transpile-only src/index.ts",
-        "build": "yarn lint && tsc -p tsconfig.json && yarn copy-files",
+        "build": "yarn lint && tsc -p tsconfig.json && yarn mkdir-assets && yarn copy-files",
         "test": "yarn build && nyc mocha dist/test/*.js --recursive --timeout 60000 --exit",
         "format": "npx prettier --write .",
         "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
-        "copy-files": "cp ./src/app/assets/*.html ./dist/src/app/assets/"
+        "copy-files": "cp ./src/app/assets/*.html ./dist/src/app/assets/",
+        "mkdir-assets": "mkdir ./dist/src/app/assets/"
     },
     "husky": {
         "hooks": {
