@@ -19,6 +19,8 @@
         "test:win": "yarn mkdir-assets-win && yarn copy-files-win && yarn start-mocha",
         "format": "npx prettier --write .",
         "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
+        "mkdir-assets": "mkdir ./dist/src/app/assets/",
+        "copy-files": "copy ./src/app/assets/*.html ./dist/src/app/assets/",
         "copy-envFile-win": "copy .\\src\\app*.en .\\dist\\src\\app\\assets\\",
         "copy-files-win": "copy .\\src\\app\\assets\\*.html .\\dist\\src\\app\\assets\\",
         "mkdir-assets-win": " if not exist .\\dist\\src\\app\\assets\\ mkdir .\\dist\\src\\app\\assets\\"
