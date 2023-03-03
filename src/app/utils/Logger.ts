@@ -19,7 +19,7 @@ class Logger {
                     dirname:
                         process.platform === 'win32'
                             ? '/Repos/BeFit/BeFitBackend/logs'
-                            : '/opt/render/project/logs',
+                            : '~/logs',
                     filename: 'application-%DATE%.log',
                     datePattern: 'DD-MM-YYYY',
                     zippedArchive: true,
