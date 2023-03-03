@@ -1,21 +1,13 @@
-import { Response } from 'express';
-import Logger from '../utils/Logger';
+import { Error as MongooseError } from 'mongoose';
 
-class ErrorHandler<T> {
-    private logger: Logger;
+class ErrorHandler extends MongooseError {
+    statusCode: number;
+    composedErrorMessage: { [composedErrorMessage: string]: string };
 
-    constructor() {
-        this.logger = new Logger();
-    }
-
-    handleError(error: T, customMessage?: string, res?: Response): void {
-        if (error instanceof Error) {
-            this.logger.error(customMessage ? customMessage : error.message);
-
-            res?.status(500).json({ message: error.name });
-        } else {
-            this.logger.error('Unknown error');
-        }
+    constructor(statusCode: number, menssage: string) {
+        super(menssage);
+        this.statusCode = statusCode;
+        this.composedErrorMessage = {};
     }
 }
 

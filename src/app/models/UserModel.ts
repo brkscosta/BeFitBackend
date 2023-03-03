@@ -1,15 +1,50 @@
 import { compare, genSalt, hash } from 'bcrypt';
 import { Document, model, Schema } from 'mongoose';
+import { boolean, date, number, object, string } from 'zod';
 
-enum UserType {
+export enum EUserType {
     PERSONAL = 1,
     NORMAL_USER = 2,
     NUTRICIONIST = 3,
 }
 
+export const UserCreationValidation = object({
+    firstName: string({ required_error: 'First name is required' }).min(3, {
+        message: 'Must be 3 or more characters long',
+    }),
+    lastName: string({ required_error: 'Last name is required' }).min(3, {
+        message: 'Must be 3 or more characters long',
+    }),
+    dateOfBirth: string()
+        .regex(/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/)
+        .transform((value) => new Date(value)),
+    email: string({ required_error: 'Email is required' }).email({
+        message: 'Invalid email address',
+    }),
+    password: string({ required_error: 'Password is required' }).min(8, {
+        message: 'Must be 8 or more characters long',
+    }),
+    passwordResetToken: string().optional(),
+    passwordResetExpires: date().optional(),
+    createdAt: date().default(() => new Date()),
+    isAdmin: boolean().default(false),
+    isActive: boolean().default(true),
+    type: number().default(EUserType.NORMAL_USER),
+});
+
+export const UserLoginValidation = object({
+    email: string({ required_error: 'Email is required' }).email({
+        message: 'Invalid email address',
+    }),
+    password: string({ required_error: 'Password is required' }).min(8, {
+        message: 'The password must have than 8 or more characters',
+    }),
+});
+
 export interface IUser extends Document {
     firstName: string;
     lastName: string;
+    dateOfBirth: Date;
     email: string;
     password: string;
     passwordResetToken: string;
@@ -17,18 +52,22 @@ export interface IUser extends Document {
     createdAt: Date;
     isAdmin: boolean;
     isActive: boolean;
-    type: UserType;
+    type: EUserType;
 
     comparePassword(this: IUser, password: string): Promise<boolean>;
 }
 
-const userSchema = new Schema({
+const userMongooseSchema = new Schema({
     firstName: {
         type: String,
         required: true,
     },
     lastName: {
         type: String,
+        required: true,
+    },
+    dateOfBirth: {
+        type: Date,
         required: true,
     },
     email: {
@@ -64,11 +103,11 @@ const userSchema = new Schema({
     },
     type: {
         type: Number,
-        default: UserType.NORMAL_USER,
+        default: EUserType.NORMAL_USER,
     },
 });
 
-userSchema.pre<IUser>('save', async function (next) {
+userMongooseSchema.pre<IUser>('save', async function (next) {
     const user = this as IUser;
     if (!user.isModified('password')) return next();
 
@@ -77,11 +116,11 @@ userSchema.pre<IUser>('save', async function (next) {
     next();
 });
 
-userSchema.methods.comparePassword = async function (
-    this: IUser,
-    password: string
+export const comparePassword = async function (
+    password: string,
+    hashPassword: string
 ): Promise<boolean> {
-    return compare(password, this.password);
+    return await compare(password, hashPassword);
 };
 
-export const User = model<IUser>('User', userSchema);
+export const User = model<IUser>('User', userMongooseSchema);

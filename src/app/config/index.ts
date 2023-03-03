@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Parsing the env file.
-dotenv.config({ path: path.resolve(__dirname, './config.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 // Interface to load env variables
 // Note these variables can possibly be undefined
@@ -18,6 +18,7 @@ interface IEnverionment {
     MONGO_DOMAIN: string;
     GMAIL_EMAIL: string;
     GMAIL_PASSWORD: string;
+    ACCESS_TOKEN_SECRET: string;
 }
 
 interface IConfig {
@@ -30,6 +31,7 @@ interface IConfig {
     MONGO_DOMAIN: string;
     GMAIL_EMAIL: string;
     GMAIL_PASSWORD: string;
+    ACCESS_TOKEN_SECRET: string;
 }
 
 // Loading process.env as ENV interface
@@ -44,6 +46,7 @@ const getConfig = (): IEnverionment => {
         MONGO_DOMAIN: process.env.MONGO_DOMAIN,
         GMAIL_EMAIL: process.env.GMAIL_EMAIL,
         GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
+        ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
     };
 };
 
@@ -64,6 +67,6 @@ const getSanitzedConfig = (config: IEnverionment): IConfig => {
 
 const config = getConfig();
 
-const sanitizedConfig = getSanitzedConfig(config);
+const loadEnvVariables = getSanitzedConfig(config);
 
-export default sanitizedConfig;
+export default loadEnvVariables;

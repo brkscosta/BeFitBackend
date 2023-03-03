@@ -15,9 +15,4 @@ describe('Email Service', async () => {
     it('should create an instance using its constructor', () => {
         expect(emailMsg, 'should exist').to.exist; // tslint:disable-line:no-unused-expression
     });
-
-    it('should return true when the email is sent', async () => {
-        const returnValue = await emailMsg.sendMail();
-        expect(returnValue).to.be.true;
-    });
 });

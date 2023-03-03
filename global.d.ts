@@ -9,5 +9,6 @@ namespace NodeJS {
         MONGO_DOMAIN: string;
         GMAIL_EMAIL: string;
         GMAIL_PASSWORD: string;
+        ACCESS_TOKEN_SECRET: string;
     }
 }

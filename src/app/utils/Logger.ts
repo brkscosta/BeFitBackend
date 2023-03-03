@@ -16,7 +16,10 @@ class Logger {
             transports: [
                 new DailyRotateFile({
                     level: 'info',
-                    dirname: '/var/log/myapp',
+                    dirname:
+                        process.platform === 'win32'
+                            ? '/Repos/BeFit/BeFitBackend/logs'
+                            : '/opt/render/project/logs',
                     filename: 'application-%DATE%.log',
                     datePattern: 'DD-MM-YYYY',
                     zippedArchive: true,

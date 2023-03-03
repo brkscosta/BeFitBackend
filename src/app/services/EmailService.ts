@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import nodemailer, { Transporter } from 'nodemailer';
 import * as path from 'path';
-import sanitizedConfig from '../config';
 import ErrorHandler from '../utils/ErrorHandler';
 import Logger from '../utils/Logger';
 
@@ -34,7 +33,6 @@ export interface IMail {
 
 class EmailService implements IMail {
     private logger = new Logger();
-    private errorHandler = new ErrorHandler();
     private transporter: Transporter;
     header: IMailHeader;
     body: IMailBody;
@@ -48,32 +46,39 @@ class EmailService implements IMail {
             host: 'smtp.gmail.com',
             secure: true,
             auth: {
-                user: sanitizedConfig.GMAIL_EMAIL,
-                pass: sanitizedConfig.GMAIL_PASSWORD,
+                user: process.env.GMAIL_EMAIL,
+                pass: process.env.GMAIL_PASSWORD,
             },
         });
     }
 
     public async sendMail(): Promise<boolean> {
-        try {
-            const mailOptions = {
-                from: this.header.from,
-                to: this.header.to,
-                cc: this.header.cc,
-                bcc: this.header.bcc,
-                subject: this.header.subject,
-                html: html.replace('{{activationLink}}', `${this.body}`),
-                attachments: this.body.attachments,
-            };
+        let success = true;
+        let menssage = 'Email sent successfully';
 
-            const info = await this.transporter.sendMail(mailOptions);
+        const mailOptions = {
+            from: this.header.from,
+            to: this.header.to,
+            cc: this.header.cc,
+            bcc: this.header.bcc,
+            subject: this.header.subject,
+            html: html.replace('{{activationLink}}', `${this.body}`),
+            attachments: this.body.attachments,
+        };
 
-            this.logger.info(info.response);
-            return true;
-        } catch (err) {
-            this.errorHandler.handleError(err);
-            return false;
+        await this.transporter.sendMail(mailOptions).catch((error: Error) => {
+            if (error) {
+                menssage = error.message;
+                success = false;
+            }
+        });
+
+        if (!success) {
+            throw new ErrorHandler(400, menssage);
         }
+
+        this.logger.info(menssage);
+        return success;
     }
 }
 
