@@ -14,7 +14,7 @@
         "start": "node dist/src/index.js",
         "dev:server": "ts-node-dev --respawn --transpile-only src/index.ts",
         "check-sintax": "yarn lint && tsc -p tsconfig.json",
-        "build": "yarn check-sintax && yarn mkdir-assets && yarn copy-files",
+        "build": "yarn check-sintax && yarn copy-files",
         "build:win": "yarn check-sintax && yarn copy-files-win && yarn copy-envFile-win",
         "start-mocha": "tsc -p tsconfig.json && nyc mocha dist/test/*.js --recursive --timeout 60000 --exit",
         "test:win": "yarn copy-files-win && yarn start-mocha",
