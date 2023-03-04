@@ -1,23 +1,27 @@
 import mongoose from 'mongoose';
-import Logger from '../utils/Logger';
-import MongooseErrorWrapper from '../utils/MongooseError';
+import CMongooseException from '../errors/CMongooseException';
+import Logger from '../utils/CLogger';
+import { IEnverionmentVariables } from './CEnvironmentLoader';
 
-const BASE_URL = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_DOMAIN}/`;
-
-class Database {
+class CDatabaseConnection {
     private url: string;
-    private logger = new Logger();
+    private logger: Logger;
     private message: string;
     private success: boolean;
+    readonly BASE_URL: string;
 
-    constructor() {
+    constructor(logger: Logger, env: IEnverionmentVariables) {
+        this.BASE_URL = `mongodb+srv://${env.MONGO_USERNAME}:${env.MONGO_PASSWORD}@${env.MONGO_DOMAIN}/`;
+
+        this.logger = logger;
         this.success = true;
         this.message = '';
         mongoose.set('strictQuery', false);
-        if (process.env.NODE_ENV === 'DEV') {
-            this.url = `${BASE_URL}${process.env.MONGO_DB_NAME_DEV}?retryWrites=true&w=majority`;
+
+        if (env.NODE_ENV === 'DEV') {
+            this.url = `${this.BASE_URL}${env.MONGO_DB_NAME_DEV}?retryWrites=true&w=majority`;
         } else {
-            this.url = `${BASE_URL}${process.env.MONGO_DB_NAME}?retryWrites=true&w=majority`;
+            this.url = `${this.BASE_URL}${env.MONGO_DB_NAME}?retryWrites=true&w=majority`;
         }
     }
 
@@ -33,7 +37,7 @@ class Database {
         });
 
         if (!this.success) {
-            throw new MongooseErrorWrapper(400, this.message);
+            throw new CMongooseException(400, this.message);
         }
 
         this.logger.info('🟢 Mongo db connected');
@@ -51,11 +55,11 @@ class Database {
         });
 
         if (!this.success) {
-            throw new MongooseErrorWrapper(400, this.message);
+            throw new CMongooseException(400, this.message);
         }
 
         this.logger.info('🔴 Mongo db disconnected');
     }
 }
 
-export default Database;
+export default CDatabaseConnection;
