@@ -22,7 +22,7 @@ class CServer {
         CServer.environmentLoader = new CEnvironmentLoader().get();
         this.port = CServer.environmentLoader.PORT;
         CServer.eventEmitter = new CEventEmitter();
-        CServer.logger = new CLogger();
+        CServer.logger = new CLogger(CServer.environmentLoader);
         CServer.emailSrv = new CEmailService(CServer.logger, CServer.environmentLoader);
         this.database = new Database(CServer.logger, CServer.environmentLoader);
     }
