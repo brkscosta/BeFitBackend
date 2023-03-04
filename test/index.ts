@@ -12,8 +12,8 @@ describe('Email Service', async () => {
     // const body = { body: 'Teste' };
     // const email = { header: header, body: body };
 
-    const logger = new CLogger();
     const enverionmentLoader = new CEnvironmentLoader().get();
+    const logger = new CLogger(enverionmentLoader);
     const emailMsg: CEmailService = new CEmailService(logger, enverionmentLoader);
 
     it('should create an instance using its constructor', () => {
