@@ -15,15 +15,15 @@
         "dev:server": "ts-node-dev --respawn --transpile-only src/index.ts",
         "check-sintax": "yarn lint && tsc -p tsconfig.json",
         "build": "yarn check-sintax && yarn mkdir-assets && yarn copy-files",
+        "build:win": "yarn check-sintax && yarn copy-files-win && yarn copy-envFile-win",
         "start-mocha": "tsc -p tsconfig.json && nyc mocha dist/test/*.js --recursive --timeout 60000 --exit",
         "test:win": "yarn mkdir-assets-win && yarn copy-files-win && yarn start-mocha",
         "format": "npx prettier --write .",
         "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
         "mkdir-assets": "mkdir ./dist/src/app/assets/",
-        "copy-files": "cp ./src/app/assets/*.html ./dist/src/app/assets/",
-        "copy-envFile-win": "copy .\\src\\app*.en .\\dist\\src\\app\\assets\\",
-        "copy-files-win": "copy .\\src\\app\\assets\\*.html .\\dist\\src\\app\\assets\\",
-        "mkdir-assets-win": " if not exist .\\dist\\src\\app\\assets\\ mkdir .\\dist\\src\\app\\assets\\"
+        "copy-files": "cp -a ./src/app/public/ ./dist/src/app/public/",
+        "copy-envFile-win": "copy .\\.env .\\dist\\",
+        "copy-files-win": "xcopy /s .\\src\\public\\ .\\dist\\src\\public\\"
     },
     "husky": {
         "hooks": {
@@ -39,7 +39,7 @@
         "@types/express": "^4.17.17",
         "@types/jsonwebtoken": "^9.0.1",
         "@types/mocha": "^10.0.1",
-        "@types/node": "^18.13.0",
+        "@types/node": "^18.14.6",
         "@types/nodemailer": "^6.4.7",
         "@typescript-eslint/eslint-plugin": "^5.51.0",
         "@typescript-eslint/parser": "^5.51.0",

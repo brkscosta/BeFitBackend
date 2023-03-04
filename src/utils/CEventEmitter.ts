@@ -1,10 +1,10 @@
-interface EventEmitterInterface {
+interface IEventEmitterInterface {
     on(event: string, listener: (...args: unknown[]) => void): this;
     off(event: string, listener: (...args: unknown[]) => void): this;
     emit(event: string, ...args: unknown[]): boolean;
 }
 
-class EventEmitter implements EventEmitterInterface {
+class CEventEmitter implements IEventEmitterInterface {
     private listeners: { [event: string]: Array<(...args: unknown[]) => void> } = {};
 
     on(event: string, listener: (...args: unknown[]) => void): this {
@@ -22,9 +22,7 @@ class EventEmitter implements EventEmitterInterface {
             return this;
         }
 
-        this.listeners[event] = this.listeners[event].filter(
-            (registeredListener) => registeredListener !== listener
-        );
+        this.listeners[event] = this.listeners[event].filter((registeredListener) => registeredListener !== listener);
 
         return this;
     }
@@ -40,4 +38,4 @@ class EventEmitter implements EventEmitterInterface {
     }
 }
 
-export default EventEmitter;
+export default CEventEmitter;

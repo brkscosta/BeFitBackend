@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 import nodemailer, { Transporter } from 'nodemailer';
 import * as path from 'path';
-import ErrorHandler from '../utils/ErrorHandler';
-import Logger from '../utils/Logger';
+import CEmailException from '../errors/CEmailException';
+import { IEnverionmentVariables } from '../utils/CEnvironmentLoader';
+import Logger from '../utils/CLogger';
 
-const filePath = path.join(__dirname, './../assets/AccountConfirmation.html');
+const filePath = path.join(__dirname, './../public/AccountConfirmation.html');
 const html = fs.readFileSync(filePath, 'utf-8');
 
 interface IMailAttachment {
@@ -27,43 +28,41 @@ interface IMailBody {
 }
 
 export interface IMail {
-    header: IMailHeader;
-    body: IMailBody;
+    sendMail(header: IMailHeader, body: IMailBody): Promise<boolean>;
 }
 
-class EmailService implements IMail {
-    private logger = new Logger();
+class CEmailService implements IMail {
+    private logger: Logger;
+    private environmentLoader: IEnverionmentVariables;
     private transporter: Transporter;
-    header: IMailHeader;
-    body: IMailBody;
 
-    constructor(email: IMail) {
-        this.header = email.header;
-        this.body = email.body;
+    constructor(logger: Logger, environmentLoader: IEnverionmentVariables) {
+        this.logger = logger;
+        this.environmentLoader = environmentLoader;
 
         this.transporter = nodemailer.createTransport({
             service: 'gmail',
             host: 'smtp.gmail.com',
             secure: true,
             auth: {
-                user: process.env.GMAIL_EMAIL,
-                pass: process.env.GMAIL_PASSWORD,
+                user: this.environmentLoader.GMAIL_EMAIL,
+                pass: this.environmentLoader.GMAIL_PASSWORD,
             },
         });
     }
 
-    public async sendMail(): Promise<boolean> {
+    public async sendMail(header: IMailHeader, body: IMailBody): Promise<boolean> {
         let success = true;
         let menssage = 'Email sent successfully';
 
         const mailOptions = {
-            from: this.header.from,
-            to: this.header.to,
-            cc: this.header.cc,
-            bcc: this.header.bcc,
-            subject: this.header.subject,
-            html: html.replace('{{activationLink}}', `${this.body}`),
-            attachments: this.body.attachments,
+            from: header.from,
+            to: header.to,
+            cc: header.cc,
+            bcc: header.bcc,
+            subject: header.subject,
+            html: html.replace('{{activationLink}}', `${body}`),
+            attachments: body.attachments,
         };
 
         await this.transporter.sendMail(mailOptions).catch((error: Error) => {
@@ -74,7 +73,7 @@ class EmailService implements IMail {
         });
 
         if (!success) {
-            throw new ErrorHandler(400, menssage);
+            throw new CEmailException(400, menssage);
         }
 
         this.logger.info(menssage);
@@ -82,4 +81,4 @@ class EmailService implements IMail {
     }
 }
 
-export default EmailService;
+export default CEmailService;

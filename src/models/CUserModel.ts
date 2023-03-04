@@ -116,11 +116,8 @@ userMongooseSchema.pre<IUser>('save', async function (next) {
     next();
 });
 
-export const comparePassword = async function (
-    password: string,
-    hashPassword: string
-): Promise<boolean> {
+export const comparePassword = async function (password: string, hashPassword: string): Promise<boolean> {
     return await compare(password, hashPassword);
 };
 
-export const User = model<IUser>('User', userMongooseSchema);
+export const CUserModel = model<IUser>('CUserModel', userMongooseSchema);
