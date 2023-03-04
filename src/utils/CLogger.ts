@@ -11,8 +11,8 @@ class CLogger {
             transports: [
                 new DailyRotateFile({
                     level: 'info',
-                    dirname: process.platform === 'win32' ? '/Repos/BeFit/BeFitBackend/logs' : '~/logs',
-                    filename: 'application-%DATE%.log',
+                    dirname: 'logs',
+                    filename: 'befit-%DATE%.log',
                     datePattern: 'DD-MM-YYYY',
                     zippedArchive: true,
                     maxSize: '20m',

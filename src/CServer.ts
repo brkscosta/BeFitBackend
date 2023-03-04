@@ -1,9 +1,8 @@
 import express, { Router } from 'express';
 import 'express-async-errors';
-import path from 'path';
 import AuthController from './controllers/CAuthController';
 import UserController from './controllers/CUserController';
-import { authenticateToken, errorHandler } from './middlewares';
+import { authenticateToken } from './middlewares';
 import CEmailService from './services/CEmailService';
 import Database from './utils/CDataBaseConnection';
 import CEnvironmentLoader, { IEnverionmentVariables } from './utils/CEnvironmentLoader';
@@ -38,14 +37,7 @@ class CServer {
         //AuthController
         CServer.routes.post('/api/v1/auth/authenticate', AuthController.authenticate);
 
-        const app = express();
-        app.use(express.static(path.join(__dirname, 'public')));
-        app.use(express.static(path.join(__dirname, 'assets')));
-        app.use(express.json());
-        app.use(express.urlencoded({ extended: true }));
-        app.use(CServer.routes);
-        app.use(errorHandler);
-        callback(app, this.database, this.port);
+        callback(express(), this.database, this.port);
     }
 
     public static getLogger(): CLogger {

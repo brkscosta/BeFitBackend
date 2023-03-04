@@ -26,6 +26,7 @@ body {
     margin-bottom: 2rem;
 }
 
-p, h1 {
+p,
+h1 {
     color: #fffafa;
 }
