@@ -21,7 +21,7 @@ class CLogger {
             ],
         });
 
-        if (process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV !== 'PROD') {
             this.logger.add(
                 new transports.Console({
                     format: format.simple(),
