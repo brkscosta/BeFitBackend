@@ -21,7 +21,7 @@
         "format": "npx prettier --write .",
         "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
         "mkdir-assets": "mkdir ./dist/src/public/",
-        "copy-files": "cp -a ./src/public/ ./dist/src/public/",
+        "copy-files": "cp -avR ./src/public/ ./dist/src/public/",
         "copy-envFile-win": "copy .\\.env .\\dist\\",
         "copy-files-win": "xcopy /s .\\src\\public\\ .\\dist\\src\\public\\"
     },
