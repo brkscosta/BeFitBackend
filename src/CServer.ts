@@ -4,7 +4,11 @@ import { createTransport, Transporter } from 'nodemailer';
 import path from 'path';
 import { CAuthController } from './controllers/CAuthController';
 import { CUserController } from './controllers/CUserController';
-import { errorHandler } from './middlewares';
+<<<<<<< HEAD
+import { authenticateToken, errorHandler } from './middlewares';
+=======
+import { authenticateToken, errorHandler } from './middlewares';
+>>>>>>> 67bbbea (Added coverage support (lcov) removed some env variables  and test for CEmailService.ts)
 import { CUserRepository, IUserRepository } from './repositories/CUserRepository';
 import { CEmailService, IMailService } from './services/CEmailService';
 import { CDatabaseConnection } from './utils/CDataBaseConnection';
@@ -57,15 +61,15 @@ class CServer {
         const app = this.setupExpressApp();
 
         // UserController
-        this.routes.get('/api/v1/users/ctrlName', this.userController.toString);
+        this.routes.get('/api/v1/users/ctrlName',authenticateToken, this.userController.toString);
         this.routes.get('/api/v1/users', this.userController.getAllUsers);
         this.routes.post('/api/v1/users/addUser', this.userController.addUser);
-        this.routes.post('/api/v1/users/sendEmail', this.userController.sendEmail);
+        this.routes.post('/api/v1/users/sendEmail', authenticateToken, this.userController.sendEmail);
         this.routes.post('/api/v1/users/:email', this.userController.find);
         this.routes.delete('/api/v1/users/removeUser/:email', this.userController.remove);
 
         //AuthController
-        this.routes.post('/api/v1/auth/authenticate', CAuthController.authenticate);
+        this.routes.post('/api/v1/auth/login', CAuthController.authenticate);
 
         callback(app, this.database, this.port, this.logger);
     }
@@ -74,7 +78,7 @@ class CServer {
         const app = express();
         app.use(express.static(path.join(__dirname, 'public')));
         app.use(express.static(path.join(__dirname, 'assets')));
-        app.use(express.static(path.join(__dirname, '../coverage/lcov-report')));
+        app.use('/coverage', express.static(path.join(__dirname, '../coverage/lcov-report')));
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));
         app.use(this.routes);
