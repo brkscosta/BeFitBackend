@@ -1,67 +1,82 @@
 import { Request, Response } from 'express';
-import CServer from '../CServer';
-import CMongooseException from '../errors/CMongooseException';
-import CZodException from '../errors/CZodException';
-import { CUserModel, UserCreationValidation } from '../models/CUserModel';
+import { CMongooseException } from '../errors/CMongooseException';
+import { CZodException } from '../errors/CZodException';
+import { IUser, UserCreationValidation } from '../models/CUserModel';
+import { IUserRepository } from '../repositories/CUserRepository';
+import { IMailService } from '../services/CEmailService';
 
-/**
- * Reponsible for handling requests to /api/v1/users
- *
- * @param {Request} req
- * @param {Response} res
- * @param {NextFunction} next
- **/
-class UserController {
-    public static async getAllUsers(req: Request, res: Response) {
-        const users = await CUserModel.find({});
+export class CUserController {
+    private static userRepository: IUserRepository;
+    private static emailSrv: IMailService;
+
+    constructor(userRepository: IUserRepository, emailSrv: IMailService) {
+        CUserController.userRepository = userRepository;
+        CUserController.emailSrv = emailSrv;
+    }
+
+    public async getAllUsers(_req: Request, res: Response) {
+        const users = await CUserController.userRepository.findAll();
         const filteredUsers: string[] = users.map((user) => user.firstName);
 
         return res.status(200).json(filteredUsers);
     }
 
-    public static async addUser(req: Request, res: Response) {
-        let success = true;
-        let message = '';
+    public async addUser(req: Request, res: Response) {
         const validatedData = UserCreationValidation.safeParse(req.body);
 
         if (!validatedData.success) {
             throw new CZodException(403, validatedData.error.issues);
         }
 
-        if (await CUserModel.findOne({ email: validatedData.data.email })) {
-            throw new CMongooseException(409, 'User already exists with this email');
+        const user = validatedData.data as IUser;
+        const userExists = await CUserController.userRepository.findByEmail(user.email);
+        if (userExists) {
+            throw new CMongooseException(409, 'Email already in use');
         }
 
-        await CUserModel.create(validatedData.data).catch((error: Error) => {
-            if (error) {
-                success = false;
-                message = error.message.split(':')[0];
-            }
-        });
+        const newUser = await CUserController.userRepository.create(user);
 
-        if (!success) {
-            throw new CMongooseException(409, message);
+        if (!newUser) {
+            throw new CMongooseException(409, 'Failed to create user');
         }
 
-        return res.status(201).send({
-            message: 'User added successfully',
-        });
+        return res.status(201).json({ id: newUser.id, message: 'User added successfully' });
     }
 
-    public static async toString(req: Request, res: Response) {
-        CServer.getLogger().info(`New Request from ${req.socket?.remoteAddress?.split(':').pop()?.trim()}`);
+    public async remove(req: Request, res: Response) {
+        const email = req.params.email;
 
-        return res.status(200).send('UserController');
+        if (!(await CUserController.userRepository.remove(email))) {
+            return res.status(400).json({ message: 'User has not been deactivated!' });
+        } else {
+            return res.status(200).json({ message: 'User has been deactivated!' });
+        }
     }
 
-    public static async sendEmail(req: Request, res: Response) {
+    public async find(req: Request, res: Response) {
+        const user = await CUserController.userRepository.findByEmail(req.params.email);
+
+        if (!user) {
+            throw new CMongooseException(404, `User email ${req.params.email} not found`);
+        }
+
+        return res.status(200).json({ user: user });
+    }
+
+    public async sendEmail(req: Request, res: Response) {
         const { header, body } = req.body;
-        const emailSrv = CServer.getEmailService();
+        const emailSrv = CUserController.emailSrv;
 
-        await emailSrv.sendMail(header, body);
-
-        return res.status(200).json({ message: 'Email sent successfully.' });
+        const isEmailSent = await emailSrv.sendMail(header, body);
+        if (isEmailSent) {
+            return res.status(200).json({ message: 'Email sent successfully.' });
+        } else {
+            return res.status(400).json({ message: 'Email not sent :c' });
+        }
     }
-}
 
-export default UserController;
+    public static async toString(_req: Request, res: Response) {
+        return res.status(200).send(CUserController.name);
+    }
+    // Restante da classe
+}

@@ -4,7 +4,7 @@ interface IEventEmitterInterface {
     emit(event: string, ...args: unknown[]): boolean;
 }
 
-class CEventEmitter implements IEventEmitterInterface {
+export class CEventEmitter implements IEventEmitterInterface {
     private listeners: { [event: string]: Array<(...args: unknown[]) => void> } = {};
 
     on(event: string, listener: (...args: unknown[]) => void): this {
@@ -37,5 +37,3 @@ class CEventEmitter implements IEventEmitterInterface {
         return true;
     }
 }
-
-export default CEventEmitter;

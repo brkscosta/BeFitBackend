@@ -1,9 +1,7 @@
 import * as fs from 'fs';
-import nodemailer, { Transporter } from 'nodemailer';
+import { Transporter } from 'nodemailer';
 import * as path from 'path';
-import CEmailException from '../errors/CEmailException';
-import { IEnverionmentVariables } from '../utils/CEnvironmentLoader';
-import Logger from '../utils/CLogger';
+import { CEmailException } from '../errors/CEmailException';
 
 const filePath = path.join(__dirname, './../public/AccountConfirmation.html');
 const html = fs.readFileSync(filePath, 'utf-8');
@@ -27,34 +25,24 @@ interface IMailBody {
     attachments?: IMailAttachment[];
 }
 
-export interface IMail {
+export interface IMailService {
     sendMail(header: IMailHeader, body: IMailBody): Promise<boolean>;
 }
 
-class CEmailService implements IMail {
-    private logger: Logger;
-    private environmentLoader: IEnverionmentVariables;
+export class CEmailService implements IMailService {
     private transporter: Transporter;
 
-    constructor(logger: Logger, environmentLoader: IEnverionmentVariables) {
-        this.logger = logger;
-        this.environmentLoader = environmentLoader;
+    constructor(transporter: Transporter) {
+        this.transporter = transporter;
 
-        this.transporter = nodemailer.createTransport({
-            service: 'gmail',
-            host: 'smtp.gmail.com',
-            secure: true,
-            auth: {
-                user: this.environmentLoader.GMAIL_EMAIL,
-                pass: this.environmentLoader.GMAIL_PASSWORD,
-            },
+        this.transporter.on('error', (err: Error) => {
+            if (err) {
+                throw new CEmailException(400, err.message);
+            }
         });
     }
 
     public async sendMail(header: IMailHeader, body: IMailBody): Promise<boolean> {
-        let success = true;
-        let menssage = 'Email sent successfully';
-
         const mailOptions = {
             from: header.from,
             to: header.to,
@@ -65,20 +53,7 @@ class CEmailService implements IMail {
             attachments: body.attachments,
         };
 
-        await this.transporter.sendMail(mailOptions).catch((error: Error) => {
-            if (error) {
-                menssage = error.message;
-                success = false;
-            }
-        });
-
-        if (!success) {
-            throw new CEmailException(400, menssage);
-        }
-
-        this.logger.info(menssage);
-        return success;
+        const email = await this.transporter.sendMail(mailOptions);
+        return email?.response.split(' ')[2] === 'OK';
     }
 }
-
-export default CEmailService;

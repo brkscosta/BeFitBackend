@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { sign } from 'jsonwebtoken';
-import CMongooseException from '../errors/CMongooseException';
-import CZodException from '../errors/CZodException';
+import { CMongooseException } from '../errors/CMongooseException';
+import { CZodException } from '../errors/CZodException';
 import { comparePassword, CUserModel, UserLoginValidation } from '../models/CUserModel';
 
 /**
@@ -11,7 +11,7 @@ import { comparePassword, CUserModel, UserLoginValidation } from '../models/CUse
  * @param {Response} res
  * @param {NextFunction} next
  **/
-class AuthController {
+export class CAuthController {
     public static async authenticate(req: Request, res: Response) {
         const { email, password } = req.body;
 
@@ -38,5 +38,3 @@ class AuthController {
         });
     }
 }
-
-export default AuthController;

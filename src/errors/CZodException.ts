@@ -1,7 +1,7 @@
 import z from 'zod';
-import CErrorHandlerBase from './CErrorHandlerBase';
+import { CErrorHandlerBase } from './CErrorHandlerBase';
 
-class CZodException extends CErrorHandlerBase {
+export class CZodException extends CErrorHandlerBase {
     constructor(statusCode: number, zodError: z.ZodIssue[]) {
         super(statusCode, 'Zod Error');
         this.composedErrorMessage = this.getErrorsMessages(zodError);
@@ -18,5 +18,3 @@ class CZodException extends CErrorHandlerBase {
         return errorMessages;
     }
 }
-
-export default CZodException;
