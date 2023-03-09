@@ -57,7 +57,7 @@ export class CServer {
         const app = this.setupExpressApp();
 
         // UserController
-        this.routes.get('/api/v1/users/ctrlName',authenticateToken, this.userController.toString);
+        this.routes.get('/api/v1/users/ctrlName', authenticateToken, this.userController.toString);
         this.routes.get('/api/v1/users', this.userController.getAllUsers);
         this.routes.post('/api/v1/users/addUser', this.userController.addUser);
         this.routes.post('/api/v1/users/sendEmail', authenticateToken, this.userController.sendEmail);
@@ -74,7 +74,7 @@ export class CServer {
         const app = express();
         app.use(express.static(path.join(__dirname, 'public')));
         app.use(express.static(path.join(__dirname, 'assets')));
-        app.use('/coverage', express.static(path.join(__dirname, '../coverage/lcov-report')));
+        app.use('/coverage', express.static(path.resolve('./coverage/lcov-report')));
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));
         app.use(this.routes);
