@@ -4,11 +4,7 @@ import { createTransport, Transporter } from 'nodemailer';
 import path from 'path';
 import { CAuthController } from './controllers/CAuthController';
 import { CUserController } from './controllers/CUserController';
-<<<<<<< HEAD
 import { authenticateToken, errorHandler } from './middlewares';
-=======
-import { authenticateToken, errorHandler } from './middlewares';
->>>>>>> 67bbbea (Added coverage support (lcov) removed some env variables  and test for CEmailService.ts)
 import { CUserRepository, IUserRepository } from './repositories/CUserRepository';
 import { CEmailService, IMailService } from './services/CEmailService';
 import { CDatabaseConnection } from './utils/CDataBaseConnection';
@@ -16,7 +12,7 @@ import { CEnvironmentLoader, IEnverionmentVariables } from './utils/CEnvironment
 import { CEventEmitter } from './utils/CEventEmitter';
 import { CLogger } from './utils/CLogger';
 
-class CServer {
+export class CServer {
     private port: number;
     private database: CDatabaseConnection;
     private userRepository: IUserRepository;
@@ -86,5 +82,3 @@ class CServer {
         return app;
     }
 }
-
-export default CServer;

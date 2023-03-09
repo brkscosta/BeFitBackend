@@ -1,4 +1,4 @@
-import CServer from './CServer';
+import { CServer } from './CServer';
 
 class App {
     private server: CServer;
