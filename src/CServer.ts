@@ -1,55 +1,85 @@
 import express, { Router } from 'express';
 import 'express-async-errors';
-import AuthController from './controllers/CAuthController';
-import UserController from './controllers/CUserController';
-import { authenticateToken } from './middlewares';
-import CEmailService from './services/CEmailService';
-import Database from './utils/CDataBaseConnection';
-import CEnvironmentLoader, { IEnverionmentVariables } from './utils/CEnvironmentLoader';
-import CEventEmitter from './utils/CEventEmitter';
-import CLogger from './utils/CLogger';
+import { createTransport, Transporter } from 'nodemailer';
+import path from 'path';
+import { CAuthController } from './controllers/CAuthController';
+import { CUserController } from './controllers/CUserController';
+import { errorHandler } from './middlewares';
+import { CUserRepository, IUserRepository } from './repositories/CUserRepository';
+import { CEmailService, IMailService } from './services/CEmailService';
+import { CDatabaseConnection } from './utils/CDataBaseConnection';
+import { CEnvironmentLoader, IEnverionmentVariables } from './utils/CEnvironmentLoader';
+import { CEventEmitter } from './utils/CEventEmitter';
+import { CLogger } from './utils/CLogger';
 
 class CServer {
     private port: number;
-    private database: Database;
-    static environmentLoader: IEnverionmentVariables;
-    static logger: CLogger;
-    static eventEmitter: CEventEmitter;
-    static emailSrv: CEmailService;
-    static routes = Router();
+    private database: CDatabaseConnection;
+    private userRepository: IUserRepository;
+    private emailSrv: IMailService;
+    private userController: CUserController;
+    private environmentLoader: IEnverionmentVariables;
+    private logger: CLogger;
+    private eventEmitter: CEventEmitter;
+    private routes = Router();
+    private transporter: Transporter;
 
     constructor() {
-        CServer.environmentLoader = new CEnvironmentLoader().get();
-        this.port = CServer.environmentLoader.PORT;
-        CServer.eventEmitter = new CEventEmitter();
-        CServer.logger = new CLogger(CServer.environmentLoader);
-        CServer.emailSrv = new CEmailService(CServer.logger, CServer.environmentLoader);
-        this.database = new Database(CServer.logger, CServer.environmentLoader);
+        this.environmentLoader = new CEnvironmentLoader().get();
+        this.port = this.environmentLoader.PORT;
+        this.eventEmitter = new CEventEmitter();
+        this.logger = new CLogger(this.environmentLoader);
+
+        this.transporter = createTransport({
+            service: 'gmail',
+            host: 'smtp.gmail.com',
+            secure: true,
+            auth: {
+                user: this.environmentLoader.GMAIL_EMAIL,
+                pass: this.environmentLoader.GMAIL_PASSWORD,
+            },
+        });
+        this.emailSrv = new CEmailService(this.transporter);
+        this.database = new CDatabaseConnection(this.logger, this.environmentLoader);
+
+        this.userRepository = new CUserRepository();
+        this.userController = new CUserController(this.userRepository, this.emailSrv);
     }
 
-    public init(callback: (expressServer: express.Express, databaseConn: Database, port: number) => void): void {
+    public init(
+        callback: (
+            expressServer: express.Express,
+            databaseConn: CDatabaseConnection,
+            port: number,
+            logger: CLogger
+        ) => void
+    ): void {
+        const app = this.setupExpressApp();
+
         // UserController
-        CServer.routes.get('/api/v1/users/userController', authenticateToken, UserController.toString);
-        CServer.routes.get('/api/v1/users', UserController.getAllUsers);
-        CServer.routes.post('/api/v1/users/addUser', UserController.addUser);
-        CServer.routes.post('/api/v1/users/sendEmail', UserController.sendEmail);
+        this.routes.get('/api/v1/users/ctrlName', this.userController.toString);
+        this.routes.get('/api/v1/users', this.userController.getAllUsers);
+        this.routes.post('/api/v1/users/addUser', this.userController.addUser);
+        this.routes.post('/api/v1/users/sendEmail', this.userController.sendEmail);
+        this.routes.post('/api/v1/users/:email', this.userController.find);
+        this.routes.delete('/api/v1/users/removeUser/:email', this.userController.remove);
 
         //AuthController
-        CServer.routes.post('/api/v1/auth/authenticate', AuthController.authenticate);
+        this.routes.post('/api/v1/auth/authenticate', CAuthController.authenticate);
 
-        callback(express(), this.database, this.port);
+        callback(app, this.database, this.port, this.logger);
     }
 
-    public static getLogger(): CLogger {
-        return this.logger;
-    }
-
-    public static getEventEmitter(): CEventEmitter {
-        return this.eventEmitter;
-    }
-
-    public static getEmailService(): CEmailService {
-        return this.emailSrv;
+    private setupExpressApp() {
+        const app = express();
+        app.use(express.static(path.join(__dirname, 'public')));
+        app.use(express.static(path.join(__dirname, 'assets')));
+        app.use(express.static(path.join(__dirname, '../coverage/lcov-report')));
+        app.use(express.json());
+        app.use(express.urlencoded({ extended: true }));
+        app.use(this.routes);
+        app.use(errorHandler);
+        return app;
     }
 }
 

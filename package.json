@@ -16,13 +16,15 @@
         "check-sintax": "yarn lint && tsc -p tsconfig.json",
         "build": "yarn check-sintax && yarn copy-files",
         "build:win": "yarn check-sintax && yarn copy-files-win && yarn copy-envFile-win",
-        "start-mocha": "tsc -p tsconfig.json && nyc mocha dist/test/*.js --recursive --timeout 60000 --exit",
-        "test:win": "yarn copy-files-win && yarn start-mocha",
+        "start-mocha": "nyc --reporter=lcov --reporter=text mocha dist/test/*.js --recursive --timeout 60000 --exit",
+        "test:win": "yarn build:win && yarn start-mocha",
+        "test:win:open-reporter": "yarn build:win && yarn start-mocha && yarn open-reporter",
+        "open-reporter": "npx live-server coverage\\lcov-report\\",
         "format": "npx prettier --write .",
         "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
         "copy-files": "cp -avR ./src/public/ ./dist/src/",
         "copy-envFile-win": "copy .\\.env .\\dist\\",
-        "copy-files-win": "xcopy /s .\\src\\public\\ .\\dist\\src\\public\\"
+        "copy-files-win": "xcopy /s /q /y .\\src\\public\\ .\\dist\\src\\public\\"
     },
     "husky": {
         "hooks": {

@@ -48,7 +48,7 @@ export interface IUser extends Document {
     email: string;
     password: string;
     passwordResetToken: string;
-    passwordResetExpires: string;
+    passwordResetExpires: Date;
     createdAt: Date;
     isAdmin: boolean;
     isActive: boolean;

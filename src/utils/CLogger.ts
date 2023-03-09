@@ -2,12 +2,12 @@ import { createLogger, format, transports } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { IEnverionmentVariables } from './CEnvironmentLoader';
 
-class CLogger {
+export class CLogger {
     private logger;
     private environmentLoader: IEnverionmentVariables;
 
     constructor(environmentLoader: IEnverionmentVariables) {
-        this.environmentLoader = environmentLoader
+        this.environmentLoader = environmentLoader;
         this.logger = createLogger({
             level: 'info',
             format: format.combine(format.timestamp(), format.errors({ stack: true }), format.splat(), format.json()),
@@ -45,5 +45,3 @@ class CLogger {
         this.logger.error(message, meta);
     }
 }
-
-export default CLogger;

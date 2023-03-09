@@ -1,44 +1,30 @@
 import mongoose from 'mongoose';
-import CMongooseException from '../errors/CMongooseException';
-import Logger from '../utils/CLogger';
+import { CMongooseException } from '../errors/CMongooseException';
+import { CLogger } from '../utils/CLogger';
 import { IEnverionmentVariables } from './CEnvironmentLoader';
 
-class CDatabaseConnection {
-    private url: string;
-    private logger: Logger;
-    private message: string;
-    private success: boolean;
-    readonly BASE_URL: string;
+export class CDatabaseConnection {
+    private readonly url: string;
+    private logger: CLogger;
 
-    constructor(logger: Logger, env: IEnverionmentVariables) {
-        this.BASE_URL = `mongodb+srv://${env.MONGO_USERNAME}:${env.MONGO_PASSWORD}@${env.MONGO_DOMAIN}/`;
-
+    constructor(logger: CLogger, env: IEnverionmentVariables) {
         this.logger = logger;
-        this.success = true;
-        this.message = '';
-        mongoose.set('strictQuery', false);
+        this.url = env.MONGO_DB_CONN_URL;
 
-        if (env.NODE_ENV === 'DEV') {
-            this.url = `${this.BASE_URL}${env.MONGO_DB_NAME_DEV}?retryWrites=true&w=majority`;
-        } else {
-            this.url = `${this.BASE_URL}${env.MONGO_DB_NAME}?retryWrites=true&w=majority`;
-        }
+        mongoose.set('strictQuery', true);
+
+        mongoose.connection.on('error', (error: Error) => {
+            if (error) {
+                throw new CMongooseException(400, error.message);
+            }
+        });
     }
 
     /**
      * Connnect to the database
      */
     public async connect() {
-        await mongoose.connect(this.url).catch((error: Error) => {
-            if (error) {
-                this.message = error.message;
-                this.success = false;
-            }
-        });
-
-        if (!this.success) {
-            throw new CMongooseException(400, this.message);
-        }
+        await mongoose.connect(this.url);
 
         this.logger.info('🟢 Mongo db connected');
     }
@@ -47,19 +33,8 @@ class CDatabaseConnection {
      * Disconnect the database
      */
     public async disconnect() {
-        await mongoose.disconnect().catch((error: Error) => {
-            if (error) {
-                this.message = error.message;
-                this.success = false;
-            }
-        });
-
-        if (!this.success) {
-            throw new CMongooseException(400, this.message);
-        }
+        await mongoose.disconnect();
 
         this.logger.info('🔴 Mongo db disconnected');
     }
 }
-
-export default CDatabaseConnection;

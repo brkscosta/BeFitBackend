@@ -1,0 +1,6 @@
+{
+    "all": true,
+    "include": ["lib/**", "node_modules/@my-org/**", "dist/src/**"],
+    "exclude": ["node_modules/@my-org/something/unwanted.js", "test/**"],
+    "excludeNodeModules": false
+}

@@ -28,5 +28,31 @@ body {
 
 p,
 h1 {
-    color: #fffafa;
+    color: #ffff;
+}
+
+/* Animação */
+h1 {
+    font-size: 4rem;
+    animation: jump 0.5s infinite;
+}
+
+p {
+    font-size: 1.5rem;
+    animation: jump 0.5s infinite reverse;
+}
+
+/* Definição da animação */
+@keyframes jump {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
 }
