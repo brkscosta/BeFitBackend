@@ -1,26 +1,11 @@
-import { CServer } from './CServer';
+import Server from './Server';
 
 class App {
-    private server: CServer;
+    private app: Server;
 
     constructor() {
-        this.server = new CServer();
-    }
-
-    public start() {
-        this.server.init((expressServer, databaseConn, port, logger) => {
-            expressServer.listen(port, () => {
-                logger.info(`HTTP Server listening on port ${port}`);
-                databaseConn.connect();
-            });
-
-            expressServer.on('close', () => {
-                logger.info('Server closed');
-                databaseConn.disconnect();
-            });
-        });
+        this.app = new Server();
     }
 }
 
-const app = new App();
-app.start();
+new App();

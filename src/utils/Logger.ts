@@ -1,8 +1,16 @@
 import { createLogger, format, transports } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import { IEnverionmentVariables } from './CEnvironmentLoader';
+import { IEnverionmentVariables } from './EnvironmentLoader';
 
-export class CLogger {
+export interface ILogger {
+    info: (message: string, meta?: Record<string, unknown>) => void;
+
+    warn: (message: string, meta?: Record<string, unknown>) => void;
+
+    error: (message: string, meta?: Record<string, unknown>) => void;
+}
+
+export default class Logger implements ILogger {
     private logger;
     private environmentLoader: IEnverionmentVariables;
 
