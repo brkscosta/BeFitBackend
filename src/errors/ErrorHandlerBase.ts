@@ -1,4 +1,4 @@
-export class CErrorHandlerBase extends Error {
+class ErrorHandlerBase extends Error {
     statusCode: number;
     composedErrorMessage: { [composedErrorMessage: string]: string };
 
@@ -8,3 +8,5 @@ export class CErrorHandlerBase extends Error {
         this.composedErrorMessage = {};
     }
 }
+
+export default ErrorHandlerBase;

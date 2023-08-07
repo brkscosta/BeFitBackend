@@ -1,10 +1,10 @@
-interface IEventEmitterInterface {
+export interface IEventEmitter {
     on(event: string, listener: (...args: unknown[]) => void): this;
     off(event: string, listener: (...args: unknown[]) => void): this;
     emit(event: string, ...args: unknown[]): boolean;
 }
 
-export class CEventEmitter implements IEventEmitterInterface {
+class EventEmitter implements IEventEmitter {
     private listeners: { [event: string]: Array<(...args: unknown[]) => void> } = {};
 
     on(event: string, listener: (...args: unknown[]) => void): this {
