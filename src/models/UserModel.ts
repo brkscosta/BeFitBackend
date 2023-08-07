@@ -1,5 +1,5 @@
 import { compare, genSalt, hash } from 'bcrypt';
-import { Document, model, Schema } from 'mongoose';
+import { CallbackWithoutResultAndOptionalError, model, Schema } from 'mongoose';
 import { boolean, date, number, object, string } from 'zod';
 
 export enum EUserType {
@@ -107,17 +107,18 @@ const userMongooseSchema = new Schema({
     },
 });
 
-userMongooseSchema.pre<IUser>('save', async function (next) {
-    const user = this as IUser;
-    if (!user.isModified('password')) return next();
+userMongooseSchema.pre('save', async function (next: CallbackWithoutResultAndOptionalError) {
+    if (!this.isModified('password')) return next();
 
     const salt = await genSalt(10);
-    user.password = await hash(user.password, salt);
-    next();
+    this.password = await hash(this.password, salt);
+
+    this.passwordResetToken = '';
+    return next();
 });
 
 export const comparePassword = async function (password: string, hashPassword: string): Promise<boolean> {
     return await compare(password, hashPassword);
 };
 
-export const CUserModel = model<IUser>('CUserModel', userMongooseSchema);
+export const UserModel = model<IUser>('CUserModel', userMongooseSchema, 'User');
