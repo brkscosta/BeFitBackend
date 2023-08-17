@@ -1,5 +1,6 @@
 import express, { json, NextFunction, Request, Response, Router, static as serverStatic, urlencoded } from 'express';
 import 'express-async-errors';
+import { createTransport } from 'nodemailer';
 import path from 'path';
 import AuthController from './controllers/AuthController';
 import UserController from './controllers/UserController';
@@ -27,7 +28,16 @@ class Server {
         this.port = this.environmentLoader.PORT | 3000;
         //this.eventEmitter = new EventEmitter();
         this.logger = new Logger(this.environmentLoader);
-        this.emailSrv = new EmailService(this.logger, this.environmentLoader);
+        const transporter = createTransport({
+            service: 'gmail',
+            host: 'smtp.gmail.com',
+            secure: true,
+            auth: {
+                user: this.environmentLoader.GMAIL_EMAIL,
+                pass: this.environmentLoader.GMAIL_PASSWORD,
+            },
+        });
+        this.emailSrv = new EmailService(this.logger, this.environmentLoader, transporter);
         this.database = new DatabaseConnection(this.logger, this.environmentLoader);
         this.userRepo = new UserRepository();
 
@@ -37,7 +47,7 @@ class Server {
 
     private initExpress() {
         this.expressServer.use(serverStatic(path.join(__dirname, 'public')));
-        this.expressServer.use(serverStatic(path.join(__dirname, 'assets')));
+        this.expressServer.use(serverStatic(path.join(__dirname, '../build/coverage/lcov-report')));
         this.expressServer.use(json());
         this.expressServer.use(urlencoded({ extended: true }));
         this.expressServer.use(this.router);
@@ -53,6 +63,10 @@ class Server {
         this.expressServer.on('close', () => {
             this.logger.info('Server closed');
             this.database.disconnect();
+        });
+
+        this.expressServer.get('/coverage', (req, res) => {
+            res.sendFile(path.join(__dirname, '../build/coverage/lcov-report/index.html'));
         });
     }
 

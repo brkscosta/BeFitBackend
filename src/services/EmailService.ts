@@ -1,11 +1,11 @@
 import * as fs from 'fs';
-import nodemailer from 'nodemailer';
+import Mail from 'nodemailer/lib/mailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport/index';
 import * as path from 'path';
 import { IEnverionmentVariables } from '../utils/EnvironmentLoader';
 import { ILogger } from '../utils/Logger';
 
-const filePath = path.join(__dirname, './../public/AccountConfirmation.html');
+const filePath = path.join(__dirname, './../assets/AccountConfirmation.html');
 const html = fs.readFileSync(filePath, 'utf-8');
 
 interface IMailAttachment {
@@ -38,24 +38,29 @@ export interface IEmailService {
 export default class EmailService implements IEmailService {
     private readonly logger: ILogger;
     private readonly environmentLoader: IEnverionmentVariables;
-    private readonly transporter: nodemailer.Transporter;
+    private readonly transporter: Mail<SMTPTransport.SentMessageInfo>;
 
-    constructor(logger: ILogger, environmentLoader: IEnverionmentVariables) {
+    constructor(
+        logger: ILogger,
+        environmentLoader: IEnverionmentVariables,
+        transporter: Mail<SMTPTransport.SentMessageInfo>
+    ) {
         this.logger = logger;
         this.environmentLoader = environmentLoader;
-
-        this.transporter = nodemailer.createTransport({
-            service: 'gmail',
-            host: 'smtp.gmail.com',
-            secure: true,
-            auth: {
-                user: this.environmentLoader.GMAIL_EMAIL,
-                pass: this.environmentLoader.GMAIL_PASSWORD,
-            },
-        });
+        this.transporter = transporter;
     }
 
-    public async send(emailData: IMail, callback: (isEmailSent: boolean) => void) {
+    public send(emailData: IMail, callback: (isEmailSent: boolean) => void) {
+        if (!emailData.email.header || Object.keys(emailData.email.header).length <= 0) {
+            callback(false);
+            return;
+        }
+
+        if (!emailData.email.body || Object.keys(emailData.email.body).length <= 0) {
+            callback(false);
+            return;
+        }
+
         const { email } = emailData;
 
         const mailOptions = {

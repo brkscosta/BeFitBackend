@@ -1,14 +1,13 @@
 import { describe, it } from '@jest/globals';
 import { expect } from 'chai';
 import dotenv from 'dotenv';
-import nodemailer from 'nodemailer';
+import { Transport } from 'nodemailer';
+import Mail from 'nodemailer/lib/mailer';
 import path from 'path';
-import * as sinon from 'sinon';
 import EmailService, { IMail } from '../src/services/EmailService';
 import EnvironmentLoader from '../src/utils/EnvironmentLoader';
-import Logger from '../src/utils/Logger';
+import Logger, { ILogger } from '../src/utils/Logger';
 dotenv.config({ path: path.resolve(__dirname, '../../.env.test') });
-
 const environmentLoader = new EnvironmentLoader().get();
 
 const testEnvVariables = {
@@ -21,46 +20,107 @@ const testEnvVariables = {
     ACCESS_TOKEN_SECRET: environmentLoader.ACCESS_TOKEN_SECRET,
 };
 
-describe('Email Service', () => {
+describe('Email Service class', () => {
     let emailMsg: EmailService;
-    let sendMailStub: sinon.SinonStub<any, any>;
+    let logger: ILogger;
+    let mockMail: Mail;
+    let transport: Transport<any>;
 
     beforeEach(() => {
-        const logger = new Logger(testEnvVariables);
-        emailMsg = new EmailService(logger, testEnvVariables);
-        sendMailStub = sinon.stub(nodemailer, 'createTransport');
-    });
+        transport = {
+            name: 'MockMailService',
+            version: '1.0',
+            send: (mailOptions: any, callback: (err: any, info: any) => void) => {
+                const messageInfo = {
+                    envelope: {},
+                    messageId: 'MessageId',
+                    accepted: {},
+                    rejected: {},
+                    pending: {},
+                    response: 'test response',
+                };
 
-    afterEach(() => {
-        sendMailStub.restore();
+                callback(null, messageInfo);
+            },
+        };
+
+        mockMail = new Mail(transport);
+        logger = new Logger(testEnvVariables);
+        emailMsg = new EmailService(logger, testEnvVariables, mockMail);
     });
 
     it('should create an instance using its constructor', () => {
+        expect(mockMail).to.exist;
+        expect(logger).to.exist;
         expect(emailMsg).to.exist;
+        expect(transport).to.exist;
     });
 
     it('should fail on send the email', async () => {
-        const data: IMail = {
+        let data = {
+            email: {
+                header: {},
+                body: {},
+            },
+        } as IMail;
+
+        emailMsg.send(data, (isEmailSent: boolean) => {
+            expect(isEmailSent).false;
+        });
+
+        data = {
             email: {
                 header: {
-                    from: '',
-                    to: '',
-                    subject: '',
+                    from: 'test@example.com',
+                    to: 'test3@example.com',
+                    subject: 'Im a test message',
                 },
-                body: {
-                    message: '',
-                },
+                body: {},
+            },
+        } as IMail;
+
+        emailMsg.send(data, (isEmailSent: boolean) => {
+            expect(isEmailSent).false;
+        });
+
+        transport = {
+            name: 'MockMailService',
+            version: '1.0',
+            send: (mailOptions: any, callback: (err: any, info: any) => void) => {
+                const messageInfo = {
+                    envelope: {},
+                    messageId: 'MessageId',
+                    accepted: {},
+                    rejected: {},
+                    pending: {},
+                    response: 'test response',
+                };
+
+                callback(new Error('An error has ocurred sending  the email'), messageInfo);
             },
         };
-        const sendMailMock = sinon.stub().yields(data);
-        sendMailStub.returns({ sendMail: sendMailMock });
 
-        await emailMsg.send(data, (isEmailSent: boolean) => {
-            expect(isEmailSent).to.be.false;
+        data = {
+            email: {
+                header: {
+                    from: 'test@example.com',
+                    to: 'test3@example.com',
+                    subject: 'Im a test message',
+                },
+                body: {
+                    message: 'Message',
+                },
+            },
+        } as IMail;
+
+        mockMail = new Mail(transport);
+        emailMsg = new EmailService(logger, testEnvVariables, mockMail);
+        emailMsg.send(data, (isEmailSent: boolean) => {
+            expect(isEmailSent).false;
         });
     });
 
-    it('should fail on send the email', async () => {
+    it('should send the email', async () => {
         const data: IMail = {
             email: {
                 header: {
@@ -73,10 +133,9 @@ describe('Email Service', () => {
                 },
             },
         };
-        const sendMailMock = sinon.stub().yields(data);
-        sendMailStub.returns({ sendMail: sendMailMock });
 
-        await emailMsg.send(data, (isEmailSent: boolean) => {
+        emailMsg.send(data, (isEmailSent: boolean) => {
+            expect(logger.info.call.length).equal(1);
             expect(isEmailSent).to.be.true;
         });
     });
