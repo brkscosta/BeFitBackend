@@ -1,8 +1,10 @@
 import { describe, it } from '@jest/globals';
 import { expect } from 'chai';
 import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 import path from 'path';
-import EmailService from '../src/services/EmailService';
+import * as sinon from 'sinon';
+import EmailService, { IMail } from '../src/services/EmailService';
 import EnvironmentLoader from '../src/utils/EnvironmentLoader';
 import Logger from '../src/utils/Logger';
 dotenv.config({ path: path.resolve(__dirname, '../../.env.test') });
@@ -20,49 +22,62 @@ const testEnvVariables = {
 };
 
 describe('Email Service', () => {
-    const logger = new Logger(testEnvVariables);
-    const emailMsg = new EmailService(logger, testEnvVariables);
+    let emailMsg: EmailService;
+    let sendMailStub: sinon.SinonStub<any, any>;
+
+    beforeEach(() => {
+        const logger = new Logger(testEnvVariables);
+        emailMsg = new EmailService(logger, testEnvVariables);
+        sendMailStub = sinon.stub(nodemailer, 'createTransport');
+    });
+
+    afterEach(() => {
+        sendMailStub.restore();
+    });
 
     it('should create an instance using its constructor', () => {
-        expect(emailMsg, 'should exist').to.exist;
-        expect(logger, 'should exist').to.exist;
+        expect(emailMsg).to.exist;
     });
 
     it('should fail on send the email', async () => {
-        const data = {
+        const data: IMail = {
             email: {
                 header: {
-                    from: 'joanacosta.costa007@gmail.com',
+                    from: '',
                     to: '',
-                    subject: 'Teste Subject',
+                    subject: '',
                 },
                 body: {
-                    message: 'Aaai que porra caralho aiaaai',
+                    message: '',
                 },
             },
         };
+        const sendMailMock = sinon.stub().yields(data);
+        sendMailStub.returns({ sendMail: sendMailMock });
 
-        await emailMsg.send(data, (isEmailSent) => {
-            expect(isEmailSent).be.false;
+        await emailMsg.send(data, (isEmailSent: boolean) => {
+            expect(isEmailSent).to.be.false;
         });
     });
 
-    it('should send the email sucessfully', async () => {
-        const data = {
+    it('should fail on send the email', async () => {
+        const data: IMail = {
             email: {
                 header: {
-                    from: 'joanacosta.costa007@gmail.com',
-                    to: 'joanacosta97@hotmail.com',
-                    subject: 'Teste Subject',
+                    from: 'test@example.com',
+                    to: 'test3@example.com',
+                    subject: 'Im a test message',
                 },
                 body: {
-                    message: 'Outra mensagem',
+                    message: 'Message',
                 },
             },
         };
+        const sendMailMock = sinon.stub().yields(data);
+        sendMailStub.returns({ sendMail: sendMailMock });
 
-        await emailMsg.send(data, (isEmailSent) => {
-            expect(isEmailSent).be.true;
+        await emailMsg.send(data, (isEmailSent: boolean) => {
+            expect(isEmailSent).to.be.true;
         });
     });
 });
