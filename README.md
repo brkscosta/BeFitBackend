@@ -1,1 +1,1 @@
-# BiFitBackend
+# BeFit API
