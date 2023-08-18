@@ -1,23 +1,18 @@
 import { describe, it } from '@jest/globals';
 import { expect } from 'chai';
-import dotenv from 'dotenv';
 import { Transport } from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
-import path from 'path';
 import EmailService, { IMail } from '../src/services/EmailService';
-import EnvironmentLoader from '../src/utils/EnvironmentLoader';
 import Logger, { ILogger } from '../src/utils/Logger';
-dotenv.config({ path: path.resolve(__dirname, '../../.env.test') });
-const environmentLoader = new EnvironmentLoader().get();
 
 const testEnvVariables = {
-    NODE_ENV: environmentLoader.NODE_ENV,
-    PORT: environmentLoader.PORT,
-    MONGO_DB_CONN_URL: environmentLoader.MONGO_DB_CONN_URL,
-    GMAIL_EMAIL: environmentLoader.GMAIL_EMAIL,
-    MONGO_DB_NAME: environmentLoader.MONGO_DB_NAME,
-    GMAIL_PASSWORD: environmentLoader.GMAIL_PASSWORD,
-    ACCESS_TOKEN_SECRET: environmentLoader.ACCESS_TOKEN_SECRET,
+    NODE_ENV: 'DEV',
+    PORT: 9999,
+    MONGO_DB_CONN_URL: 'MONGO_DB_CONN_URL',
+    GMAIL_EMAIL: 'GMAIL_EMAIL',
+    MONGO_DB_NAME: 'MONGO_DB_NAME',
+    GMAIL_PASSWORD: 'GMAIL_PASSWORD',
+    ACCESS_TOKEN_SECRET: 'ACCESS_TOKEN_SECRET',
 };
 
 describe('Email Service class', () => {
@@ -30,7 +25,7 @@ describe('Email Service class', () => {
         transport = {
             name: 'MockMailService',
             version: '1.0',
-            send: (mailOptions: any, callback: (err: any, info: any) => void) => {
+            send: (_mailOptions: any, callback: (err: any, info: any) => void) => {
                 const messageInfo = {
                     envelope: {},
                     messageId: 'MessageId',
