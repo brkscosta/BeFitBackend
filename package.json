@@ -11,7 +11,7 @@
         "build/"
     ],
     "scripts": {
-        "start": "node build/src/index.js",
+        "start": "node build/index.js",
         "dev:server": "ts-node-dev --respawn --transpile-only src/index.ts",
         "build": "yarn test && tsc -p tsconfig.json && yarn copy-files",
         "build:win": "rmdir /s /q .\\build\\ && yarn lint && tsc -p tsconfig.json && yarn copy-files:win && yarn copy-envFile-win",
