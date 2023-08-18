@@ -13,7 +13,6 @@ import { ILogger } from '../utils/Logger';
  * @param {Response} res
  * @param {NextFunction} next
  **/
-
 class UserController {
     private logger: ILogger;
     private emailSrv: IEmailService;

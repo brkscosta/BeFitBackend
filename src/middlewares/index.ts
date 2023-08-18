@@ -9,16 +9,16 @@ export const errorHandler = (error: Error, _req: Request, res: Response, next: N
 
         if (Object.keys(errorMessages).length === 0 && errorMessages.constructor === Object) {
             logger.error(error.message);
-            return res.status(error.statusCode).json({ error: error.message });
+            return res.status(error.statusCode).json({ message: error.message });
         }
 
         logger.error(JSON.stringify(errorMessages));
-        return res.status(error.statusCode).json({ error: errorMessages });
+        return res.status(error.statusCode).json({ message: errorMessages });
     }
 
     next(error);
     logger.error(error.message);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ message: 'Internal Server Error' });
 };
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction, logger: ILogger) => {

@@ -1,5 +1,6 @@
 import express, { json, NextFunction, Request, Response, Router, static as serverStatic, urlencoded } from 'express';
 import 'express-async-errors';
+import { existsSync } from 'fs';
 import { createTransport } from 'nodemailer';
 import path from 'path';
 import AuthController from './controllers/AuthController';
@@ -10,6 +11,9 @@ import EmailService, { IEmailService } from './services/EmailService';
 import DatabaseConnection, { IDatabaseConnection } from './utils/DataBaseConnection';
 import EnvironmentLoader, { IEnverionmentVariables } from './utils/EnvironmentLoader';
 import Logger, { ILogger } from './utils/Logger';
+
+const userApiURL = '/api/v1/user';
+const authApiURL = '/api/v1/auth';
 
 class Server {
     private port: number;
@@ -47,7 +51,6 @@ class Server {
 
     private initExpress() {
         this.expressServer.use(serverStatic(path.join(__dirname, 'public')));
-        this.expressServer.use(serverStatic(path.join(__dirname, '../build/coverage/lcov-report')));
         this.expressServer.use(json());
         this.expressServer.use(urlencoded({ extended: true }));
         this.expressServer.use(this.router);
@@ -64,30 +67,32 @@ class Server {
             this.logger.info('Server closed');
             this.database.disconnect();
         });
-
-        this.expressServer.get('/coverage', (req, res) => {
-            res.sendFile(path.join(__dirname, '../build/coverage/lcov-report/index.html'));
-        });
     }
 
     private initControllers() {
+        this.router.get('/coverage', (req, res) => {
+            const pathToFile = path.join(__dirname, '../build/coverage/lcov-report/index.html');
+
+            if (!existsSync(pathToFile)) {
+                return res.status(404).json({ message: 'The report coverage is not generated' });
+            }
+            
+            this.expressServer.use(serverStatic(path.join(__dirname, '../build/coverage/lcov-report')));
+            res.sendFile(pathToFile);
+        });
+
         const userCtrl = new UserController(this.logger, this.emailSrv, this.userRepo);
         const authCtrl = new AuthController(this.logger, this.emailSrv);
 
-        this.router.get(
-            '/api/v1/users/userController',
-            (req: Request, res: Response, next: NextFunction) => {
-                authenticateToken(req, res, next, this.logger);
-            },
-            userCtrl.toString
-        );
+        this.router.get(`${userApiURL}/userController`, (req: Request, res: Response, next: NextFunction) => {
+            authenticateToken(req, res, next, this.logger);
+        }, userCtrl.toString);
 
-        this.router.get('/api/v1/user/all', userCtrl.getAllUsers.bind(userCtrl));
-        this.router.post('/api/v1/user/addUser', userCtrl.addUser.bind(userCtrl));
-        this.router.post('/api/v1/user/sendEmail', userCtrl.sendEmail.bind(userCtrl));
+        this.router.get(`${userApiURL}/all`, userCtrl.getAllUsers.bind(userCtrl));
+        this.router.post(`${userApiURL}/addUser`, userCtrl.addUser.bind(userCtrl));
+        this.router.post(`${userApiURL}/sendEmail`, userCtrl.sendEmail.bind(userCtrl));
 
-        //AuthController
-        this.router.post('/api/v1/auth/authenticate', authCtrl.authenticate.bind(authCtrl));
+        this.router.post(`${authApiURL}/authenticate`, authCtrl.authenticate.bind(authCtrl));
     }
 }
 
